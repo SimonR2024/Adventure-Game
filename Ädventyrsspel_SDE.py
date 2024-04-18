@@ -15,16 +15,16 @@ class Player:
 
 
 class Item:
-    def __init__(self, namn, strenght_bonus):
+    def __init__(self, namn, strength_bonus):
         self.namn = namn
-        self.strenght_bonus = strenght_bonus
+        self.strength_bonus = strength_bonus
 
 plr = Player()
 
 
 def print_item(item):
     print(f"""    Namn: {Player.inventory[item].namn}
-    Styrkeboost: {Player.inventory[item].strenght_bonus}
+    Styrkeboost: {Player.inventory[item].strength_bonus}
     """)
 
 def main():
@@ -83,16 +83,6 @@ def restart():
     Player.poäng = 9
 
 
-vapen = ["Skymningsklingan", "Eldpilbåge", "Frostspira", "Åskhammaren", "Drakens ande", "Mörkets dolk", "Solglansen", "Stjärnfallssvärdet", "Havets hämnd", "Jordbrytaren", "Luftvirket", "Skuggornas spjut", "Eldtungan", "Kristallkastaren", "Månstrålesvärdet", "Dimslöparen", "Blodmånen", "Tidsförvrängaren", "Själssläckaren", "Natthärjaren"]
-
-def skapa_item():
-    nr = rand.randint(0, len(vapen)-1)
-    itemnamn = vapen[nr]
-    nr2 = rand.randint(1, 3)
-    item = Item(itemnamn, nr2)
-    Player.inventory.append(item) #ta bort detta sen och fråga om man vill lägga till
-
-
 def poäng():
     print(plr)
     print(f"    Du har {Player.poäng} poäng över att spendera på dina stats!")
@@ -126,11 +116,56 @@ def dörr():
     for i in range(1, 4):
         print("    ", i, ". ", rand.choice(dörrar))
     while True:
-        val = int(input("    Vilken dörr vill du välja?")).replace(" ", "").replace(".", "")
+        val = int(input("    Vilken dörr vill du välja?"))
         if val in {1, 2, 3}:
             break
         print("    Du måste skriva antingen 1, 2 eller 3.")
+    randomval = rand.randint(1, 3)
+    if randomval == 1:
+        monster()
+    elif randomval == 2:
+        fälla()
+    else:
+        kista()
 
+
+monster_lista = ["Basilisk", "Cyklop", "Zombie", "Troll", "Spöke", "Golem", "Vampyr", "Varulv", "Gorgon", "Skelett", "Mimic", "Slime", "Spindel (Stor)", "Lindorm", "Häxa"]
+
+def monster():
+    total_strength = plr.strength
+    for i in range(len(Player.inventory)):
+        total_strength += Player.inventory[i].strength_bonus
+    monster = Player()
+    monster.level = rand.randint(1, plr.level+5)
+    monster.strength = rand.randint(plr.level+3, plr.level+10)
+    print(f"""
+    Du har träffat ett monster!!
+    Namn: {rand.choice(monster_lista)}
+    Level: {monster.level}
+    Styrka: {monster.strength}
+    ...ni börjar slåss...""")
+    if monster.strength == total_strength:
+        print("    Ni slogs hårt och länge men var lika starka så ingen vann. \n    Efter ett långt slagsmål drar du dig iväg utan stor skada.")
+    elif monster.strength > total_strength:
+        print(f"    Efter en kort fight krossades du av monstret. Ditt hp är nu {plr.hp-1}")
+        plr.hp -= 1
+    else:
+        print(f"    Du kämpade hårt och lyckades äntligen ta kol på det förbaskade monstret!\n    Din level gick upp till {plr.level+1}!")
+        plr.level += 1
+
+
+def fälla():
+    print(f"    Du blev fångad i en fälla!\n    Ditt hp gick ner till {plr.hp-1}")
+    plr.hp -= 1
+
+
+vapen = ["Skymningsklingan", "Eldpilbåge", "Frostspira", "Åskhammaren", "Drakens ande", "Mörkets dolk", "Solglansen", "Stjärnfallssvärdet", "Havets hämnd", "Jordbrytaren", "Luftvirket", "Skuggornas spjut", "Eldtungan", "Kristallkastaren", "Månstrålesvärdet", "Dimslöparen", "Blodmånen", "Tidsförvrängaren", "Själssläckaren", "Natthärjaren"]
+
+def kista():
+    item = Item(rand.choice(vapen), rand.randint(1, 3))
+    if len(plr.inventory) > 5:
+        print("    Du har hittat ett item!")
+        Player.inventory.append(item) #ta bort detta sen och fråga om man vill lägga till
 
 
 #--------------------------------------------------------------------------#
@@ -149,10 +184,11 @@ När du slåss emot monster kan två olika grejer hända;
 1: du besegrar mostret och går upp en level 
 2: du förlorar mot mostret och förlorar 1 liv. 
 Den som vinner avgörs av den som har mest styrke poäng.
-Om du har otur går du in i ett rum med en fälla, fällan kommer attt skada dig och du förlorar 1 liv.
+Om du har otur går du in i ett rum med en fälla, fällan kommer att skada dig och du förlorar 1 liv.
 Om du hittar en skatt kan den bestå av olika föremål, vapen som ger dig yttligare styrka eller om du har tur, mer liv.
 
-Genom att
+Du kan max ha 5 vapen i ditt inventory, varje vapen har en styrkebonus som läggs samman i dina stats. Du kollar ditt inventory genom att trycka 3, därefter kan du välja vilka vapen du vill ha 
+elluks ud mo rav
  """); break
     else:
         break
