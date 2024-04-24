@@ -32,16 +32,18 @@ def print_item(item):
     """)
 
 def main():
-    val = input("""\n    Vad vill du göra?
+    while True:
+        val = input("""
+    Vad vill du göra?
     1: Välj dörr
     2: Kolla stats
     3: Kolla inventory
     --> """).replace(" ", "").replace(".", "")
-    match(val):
-        case("1"): dörr()
-        case("2"): print(plr)
-        case("3"): inv()
-        case(_): prin("Du måste skriva 1, 2 elller 3.")
+        match(val):
+            case("1"): dörr(); break
+            case("2"): print(plr); break
+            case("3"): inv(); break
+            case(_): prin("Du måste skriva 1, 2 elller 3.")
 
 def inv():
     if len(Player.inventory) == 0:
@@ -59,13 +61,10 @@ def endwin():
         prin("Du har nått nivå tio och vunnit spelet! Waow!")
     while True:
         fråga = input("    Vill du spela igen? (Ja/Nej) --> ").lower().replace(" ", "").replace(".", "")
-        if fråga == "ja":
-            restart()
-            break
-        elif fråga == "nej":
-            return "stop"
-        else:
-            prin("Du måste svara med ja eller nej.")
+        match fråga:
+            case("ja"): restart(); break
+            case("nej"): return "stop"
+            case(_): prin("Du måste svara med ja eller nej.")
 
 
 def restart():
@@ -82,10 +81,8 @@ def poäng():
     print(f"\n    Du har {Player.poäng} poäng över att spendera på dina stats!")
     a = 0
     while Player.poäng > 0:
-        if a == 0:
-            frg = "styrka"
-        else:
-            frg = "hp"
+        if a == 0: frg = "styrka"
+        else: frg = "hp"
         while True:
             try:
                 strf = int(input(f"    Hur många av dina poäng vill du sätta i {frg}? -->"))
@@ -110,9 +107,8 @@ def dörr():
     for i in range(1, 4):
         prin(f"{i}. {rand.choice(dörrar)}")
     while True:
-        val = int(input("    Vilken dörr vill du välja?"))
-        if val in {1, 2, 3}:
-            break
+        val = input("    Vilken dörr vill du välja?").lower().replace(" ", "").replace(".", "")
+        if val in {"1", "2", "3"}: break
         prin("Du måste skriva antingen 1, 2 eller 3.")
     rand.choice([monster, fälla, kista])()
 
@@ -126,8 +122,7 @@ def monster():
     monster = Player()
     monster.level = rand.randint(1, plr.level+5)
     monster.strength = rand.randint(plr.level+3, plr.level+10)
-    print(f"""
-    Du har träffat ett monster!!
+    prin(f"""Du har träffat ett monster!!
     Namn: {rand.choice(monster_lista)}
     Level: {monster.level}
     Styrka: {monster.strength}
@@ -145,16 +140,15 @@ def monster():
 
 def fälla():
     tal = rand.randint(1, 3)
-    if tal == 1:
-        prin(f"Du blev fångad i en fälla!\n    Ditt hp gick ner till {plr.hp-1}")
-        plr.hp -= 1
-    elif tal == 2:
-        prin("Du blev nästan fångad i en fälla, men kom snabbt undan!")
-    elif len(Player.inventory > 0):
-        prin(f"En fälla tog ditt senaste item!\n{print_item(Player.inventory[len(Player.inventory)-1])}\n    har försvunnit.")
-        del Player.inventory[len(Player.inventory)-1]
-    else:
-        prin("En fälla försökte ta ditt senaste item, men du är fattig!")
+    match tal:
+        case(1): prin(f"Du blev fångad i en fälla!\n    Ditt hp gick ner till {plr.hp-1}"); plr.hp -= 1
+        case(2): prin("Du blev nästan fångad i en fälla, men kom snabbt undan!")
+        case(3): 
+            if len(Player.inventory > 0):
+                prin(f"En fälla tog ditt senaste item!\n{print_item(Player.inventory[len(Player.inventory)-1])}\n    har försvunnit.")
+                del Player.inventory[len(Player.inventory)-1]
+            else:
+                prin("En fälla försökte ta ditt senaste item, men du är fattig!")
 
 
 vapen = ["Skymningsklingan", "Eldpilbåge", "Frostspira", "Åskhammaren", "Drakens ande", "Mörkets dolk", "Solglansen", "Stjärnfallssvärdet", "Havets hämnd", "Jordbrytaren", "Luftvirket", "Skuggornas spjut", "Eldtungan", "Kristallkastaren", "Månstrålesvärdet", "Dimslöparen", "Blodmånen", "Tidsförvrängaren", "Själssläckaren", "Natthärjaren"]
@@ -172,15 +166,14 @@ def kista():
         for i in range(5):
             prin(f"{i+1}. ")
             print_item(Player.inventory[i])
-        val = input("--> ").replace(" ", "").replace(".", "")
-        match(val):
-            case("1"): Player.inventory[0] = item
-            case("2"): Player.inventory[1] = item
-            case("3"): Player.inventory[2] = item
-            case("4"): Player.inventory[3] = item
-            case("5"): Player.inventory[4] = item
-            case("6"): prin("Ingenting hände.")
-            case(_): prin("Du måste skriva 1, 2, 3, 4, 5 eller 6.")
+        while True:
+            val = input("--> ").replace(" ", "").replace(".", "")
+            match(val):
+                case("1" | "2" | "3" | "4" | "5"):
+                    Player.inventory[int(val)-1] = item; break
+                case("6"):
+                    prin("Ingenting hände."); break
+                case(_): prin("Du måste skriva 1, 2, 3, 4, 5 eller 6.")
 
 
 #--------------------------------------------------------------------------#
