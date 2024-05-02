@@ -1,16 +1,26 @@
 import random as rand
 
-class Player:
+class Colors:
+    red = "\u001b[31m"
+    yellow = "\u001b[33m"
+    green = "\u001b[32m"
+    reset = "\u001b[0m"
+
+
+class Player:               #Detta är player-klassen som har de viktigaste statsen till spelaren
     strength = 0
     hp = 1
     inventory = []
     level = 1
     poäng = 9
 
-    def __str__(self):
+    def __str__(self):      #för att lätt kunna skriva print(playernamn) för att 
+        item_strength = 0
+        for item in plr.inventory:
+            item_strength += item.strength_bonus
         return (f"""    Här är dina stats:
     Level: {self.level}
-    Styrka: {self.strength}
+    Styrka: {self.strength} (+{item_strength})
     Hp: {self.hp}""")
 
 
@@ -23,13 +33,15 @@ plr = Player()
 
 
 def prin(text):
-    print("    " + text)
+    print("    ", end="")
+    for i in text:
+        print(i, end="", flush=True)
+    print(Colors.reset)
 
 
 def print_item(item):
     prin(f"""Namn: {item.namn}
-    Styrkeboost: {item.strength_bonus}
-    """)
+    Styrkeboost: {item.strength_bonus}""")
 
 def main():
     while True:
@@ -39,67 +51,65 @@ def main():
     2: Kolla stats
     3: Kolla inventory
     --> """).replace(" ", "").replace(".", "")
+        print("\n    ||----------||\n")
         match(val):
             case("1"): dörr(); break
             case("2"): print(plr); break
             case("3"): inv(); break
-            case(_): prin("Du måste skriva 1, 2 elller 3.")
+            case(_): prin(Colors.red + "> Du måste skriva 1, 2 elller 3.")
 
 def inv():
-    if len(Player.inventory) == 0:
+    if len(plr.inventory) == 0:
         prin("Ditt inventory är tomt!")
     else:
         prin("Här är vad som finns i ditt inventory:")
-        for i in range(len(Player.inventory)):
-            print_item(Player.inventory[i])
+        for i in range(len(plr.inventory)):
+            print_item(plr.inventory[i])
+            print()
 
 
 def endwin():
-    if Player.hp == 0:
-        prin("Du har nått noll Hp och förlorat spelet!")
+    if plr.hp == 0:
+        prin(Colors.red + ">Du har nått noll Hp och förlorat spelet!<")
     else:
-        prin("Du har nått nivå tio och vunnit spelet! Waow!")
+        prin(Colors.green + "<Du har nått nivå tio och vunnit spelet! Waow!>")
     while True:
         fråga = input("    Vill du spela igen? (Ja/Nej) --> ").lower().replace(" ", "").replace(".", "")
         match fråga:
             case("ja"): restart(); break
             case("nej"): return "stop"
-            case(_): prin("Du måste svara med ja eller nej.")
+            case(_): prin(Colors.red + "> Du måste svara med ja eller nej.")
 
 
 def restart():
-    prin("...startar om spelet...\n")
-    Player.strength = 0
-    Player.hp = 1
-    Player.inventory = []
-    Player.level = 1
-    Player.poäng = 9
+    prin(Colors.yellow + "...startar om spelet...\n")
+    plr.strength = 0
+    plr.hp = 1
+    plr.inventory = []
+    plr.level = 1
+    plr.poäng = 9
 
 
 def poäng():
     print(plr)
-    print(f"\n    Du har {Player.poäng} poäng över att spendera på dina stats!")
-    a = 0
-    while Player.poäng > 0:
-        if a == 0: frg = "styrka"
-        else: frg = "hp"
-        while True:
-            try:
-                strf = int(input(f"    Hur många av dina poäng vill du sätta i {frg}? -->"))
-                if strf < 0 or frg == "styrka" and strf >= Player.poäng:
-                    prin(f"Du måste skriva ett tal från 1 till {Player.poäng-1}.")
-                elif frg == "hp" and strf > Player.poäng:
-                    prin(f"Du måste skriva ett tal från 1 till {Player.poäng}.")
-                else:
-                    Player.poäng -= strf
-                    if a == 0:
-                        Player.strength += strf
-                    else:
-                        Player.hp += strf
-                    a += 1; break
-            except ValueError:
-                prin("Du måste skriva ett positivt heltal.")
+    prin(f"{Colors.green}\n    Du har {plr.poäng} poäng över att spendera på dina stats!")
+    fråga = "styrka"
 
+    while plr.poäng > 0:
+        try:
+            val = int(input(f"    Hur många av dina poäng vill du sätta i {fråga}? --> "))
+            if val >= 0 and val <= plr.poäng and fråga == "styrka":
+                plr.strength += val; plr.poäng -= val; fråga = "hp"
+            elif val >= 0 and val <= plr.poäng and fråga == "hp":
+                plr.hp += val; plr.poäng -= val; fråga = "styrka"
+            else:
+                prin(f"{Colors.red}> Du måste skriva ett tal mellan 0 och {plr.poäng}.")
+        except ValueError:
+            prin(Colors.red + "> Du måste skriva ett positivt heltal.")
+        
+
+#--------------------------------------------------------------------------#
+#Här är funktionen för dörrarna
 
 dörrar = ["Stor stendörr", "Dörr med runor", "Metallgrind", "Gammal grind", "Drömmarnas dörr", "Träport", "Glasportal", "Stålport", "Hemlighetsfull lucka", "Betongport", "Rostig grind", "Träskdörr", "Valv dörr", "Glastunnel", "Rostig ståldörr", "Mörk gränd", "Gammal port", "Rosa dörr", "Tunneldörr", "Kuslig port"]
 
@@ -107,83 +117,91 @@ def dörr():
     for i in range(1, 4):
         prin(f"{i}. {rand.choice(dörrar)}")
     while True:
-        val = input("    Vilken dörr vill du välja?").lower().replace(" ", "").replace(".", "")
-        if val in {"1", "2", "3"}: break
-        prin("Du måste skriva antingen 1, 2 eller 3.")
-    rand.choice([monster, fälla, kista])()
+        val = input("    Vilken dörr vill du välja?\n    --> ").lower().replace(" ", "").replace(".", "")
+        if val in {"1", "2", "3"}: print("\n    ||----------||\n"); break
+        prin(Colors.red + "Du måste skriva antingen 1, 2 eller 3.")
+    rand.choice([skapa_monster, skapa_fälla, skapa_kista])()
 
+#--------------------------------------------------------------------------#
+#här är funktionen som definerar vad ett moster är och hur en fight kommer att utspela sig baserat på spelaren respektive monstrets styrka
 
 monster_lista = ["Basilisk", "Cyklop", "Zombie", "Troll", "Spöke", "Golem", "Vampyr", "Varulv", "Gorgon", "Skelett", "Mimic", "Slime", "Spindel (Stor)", "Lindorm", "Häxa"]
 
-def monster():
+def skapa_monster():
     total_strength = plr.strength
-    for i in range(len(Player.inventory)):
-        total_strength += Player.inventory[i].strength_bonus
+    for item in plr.inventory:
+        total_strength += item.strength_bonus/2
     monster = Player()
     monster.level = rand.randint(1, plr.level+5)
-    monster.strength = rand.randint(plr.level+3, plr.level+10)
+    monster.strength = rand.randint(plr.level+3, round(total_strength)+5)
     prin(f"""Du har träffat ett monster!!
     Namn: {rand.choice(monster_lista)}
     Level: {monster.level}
     Styrka: {monster.strength}
     ...ni börjar slåss...""")
     if monster.strength == total_strength:
-        prin("Ni slogs hårt och länge men var lika starka så ingen vann. \n    Efter ett långt slagsmål drar du dig iväg utan stor skada.")
+        prin(Colors.yellow + "Ni slogs hårt och länge men var lika starka så ingen vann. \n    Efter ett långt slagsmål drar du dig iväg utan stor skada.")
     elif monster.strength > total_strength:
-        prin(f"Efter en kort fight krossades du av monstret. Ditt hp är nu {plr.hp-1}")
+        prin(f"{Colors.red}Efter en kort fight krossades du av monstret. Ditt hp är nu {plr.hp-1}.")
         plr.hp -= 1
     else:
-        prin(f"Du kämpade hårt och lyckades äntligen ta kol på det förbaskade monstret!\n    Din level gick upp till {plr.level+1}!")
+        prin(f"{Colors.green}Du kämpade hårt och lyckades äntligen ta kol på det förbaskade monstret!\n    Din level gick upp till {plr.level+1}!")
         plr.level += 1
         plr.poäng += 1
 
+#--------------------------------------------------------------------------#
+#här är en funktion för  och de olika senariosarna som han hända, dvs förlora 1 liv, förlora 1 item eller komma undan,
 
-def fälla():
-    tal = rand.randint(1, 3)
-    match tal:
-        case(1): prin(f"Du blev fångad i en fälla!\n    Ditt hp gick ner till {plr.hp-1}"); plr.hp -= 1
-        case(2): prin("Du blev nästan fångad i en fälla, men kom snabbt undan!")
+def skapa_fälla():
+    match rand.randint(1, 3):
+        case(1): prin(f"{Colors.red}Du blev fångad i en fälla!\n    Ditt hp gick ner till {plr.hp-1}"); plr.hp -= 1
+        case(2): prin(Colors.green + "Du blev nästan fångad i en fälla, men kom snabbt undan!")
         case(3): 
-            if len(Player.inventory > 0):
-                prin(f"En fälla tog ditt senaste item!\n{print_item(Player.inventory[len(Player.inventory)-1])}\n    har försvunnit.")
-                del Player.inventory[len(Player.inventory)-1]
+            if len(plr.inventory) > 0:
+                prin(Colors.red + "En fälla tog ditt senaste item!")
+                print_item(plr.inventory[len(plr.inventory)-1])
+                prin(Colors.red + "har försvunnit!")
+                del plr.inventory[len(plr.inventory)-1]
             else:
-                prin("En fälla försökte ta ditt senaste item, men du är fattig!")
-
+                prin(Colors.yellow + "En fälla försökte ta ditt senaste item, men du är fattig!")
+                
+#--------------------------------------------------------------------------#             
+#här är vapen/inventory/kist funktionen, där man kan plocka upp 5 vapen och om man hittar fler får man välja att byta ut ett vapen mot ett annat.
 
 vapen = ["Skymningsklingan", "Eldpilbåge", "Frostspira", "Åskhammaren", "Drakens ande", "Mörkets dolk", "Solglansen", "Stjärnfallssvärdet", "Havets hämnd", "Jordbrytaren", "Luftvirket", "Skuggornas spjut", "Eldtungan", "Kristallkastaren", "Månstrålesvärdet", "Dimslöparen", "Blodmånen", "Tidsförvrängaren", "Själssläckaren", "Natthärjaren"]
 
-def kista():
+def skapa_kista():
     item = Item(rand.choice(vapen), rand.randint(1, 3))
     if len(plr.inventory) < 5:
-        prin("Du har hittat ett item!\n    Eftersom ditt inventory inte är fullt läggs det i ditt inventory!")
+        prin(Colors.green + "Du har hittat ett item!\n    Eftersom ditt inventory inte är fullt läggs det i ditt inventory!")
         print_item(item)
-        Player.inventory.append(item)
+        plr.inventory.append(item)
     else:
-        prin("Ditt inventory är fullt! Vill du byta ut något för det du hittade?")
-        prin(f"Här är itemet du hittade:\n{print_item(item)}")
+        prin(Colors.yellow + "Ditt inventory är fullt! Vill du byta ut något för det du hittade?")
+        prin("Här är itemet du hittade:")
+        print_item(item)
         prin("Här är ditt inventory, skriv 1, 2, 3, 4 eller 5 för det item du vill byta ut.\n    Om du inte vill byta ut något, skriv 6.")
         for i in range(5):
             prin(f"{i+1}. ")
-            print_item(Player.inventory[i])
+            print_item(plr.inventory[i])
         while True:
             val = input("--> ").replace(" ", "").replace(".", "")
             match(val):
                 case("1" | "2" | "3" | "4" | "5"):
-                    Player.inventory[int(val)-1] = item; break
+                    plr.inventory[int(val)-1] = item; break
                 case("6"):
                     prin("Ingenting hände."); break
-                case(_): prin("Du måste skriva 1, 2, 3, 4, 5 eller 6.")
+                case(_): prin(Colors.red + "> Du måste skriva 1, 2, 3, 4, 5 eller 6.")
 
 
 #--------------------------------------------------------------------------#
-
+#Här är en introduktion/tutorial till spelet.
 print("Välkommen till vårat äventyrsspel, gjort av Simon Remle, Emelie Gyllenberg och Daniel Furo.")
 
 while True:
     fråga = input("Vill du ha en spel tutorial? (ja/nej) --> ").lower().replace(".", "").replace(" ", "")
     if not fråga in {"ja", "nej"}:
-        print("Du måste skriva antingen ja eller nej.")
+        print(Colors.red + "> Du måste skriva antingen ja eller nej." + Colors.reset)
     elif fråga == "ja":
         print("""Spelet går ut på att du som modig äventyrare ska ta dig igenom olika rum i en håla, besegra moster och hitta skatter. 
 När du når nivå 10 vinner du spelet.
@@ -201,15 +219,14 @@ Om du har för många vapen i ditt inventory så måste du välja ett att släng
 
 Lycka till på ditt äventyr!! :D
  """); break
-    else:
-        break
+    else: break
 
 
 while True:
-    if Player.level == 10 or Player.hp == 0:
+    if plr.level >= 10 or plr.hp <= 0:
         if endwin() == "stop":
             break
-    elif Player.poäng > 0:
+    if plr.poäng > 0:
         poäng()
     main()
 
