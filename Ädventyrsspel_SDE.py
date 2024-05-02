@@ -1,6 +1,7 @@
 import random as rand
+import time
 
-class Colors:
+class Colors:                   #Detta är för att färga texten
     red = "\u001b[31m"
     yellow = "\u001b[33m"
     green = "\u001b[32m"
@@ -36,6 +37,7 @@ def prin(text):
     print("    ", end="")
     for i in text:
         print(i, end="", flush=True)
+        time.sleep(0.005)
     print(Colors.reset)
 
 
@@ -45,12 +47,12 @@ def print_item(item):
 
 def main():
     while True:
-        val = input("""
+        prin("""
     Vad vill du göra?
     1: Välj dörr
     2: Kolla stats
-    3: Kolla inventory
-    --> """).replace(" ", "").replace(".", "")
+    3: Kolla inventory""")
+        val = input("    --> ").replace(" ", "").replace(".", "")
         print("\n    ||----------||\n")
         match(val):
             case("1"): dörr(); break
@@ -97,7 +99,8 @@ def poäng():
 
     while plr.poäng > 0:
         try:
-            val = int(input(f"    Hur många av dina poäng vill du sätta i {fråga}? --> "))
+            prin(f"Hur många av dina poäng vill du sätta i {fråga}?")
+            val = int(input("    --> ").replace(".", "").replace(" ", ""))
             if val >= 0 and val <= plr.poäng and fråga == "styrka":
                 plr.strength += val; plr.poäng -= val; fråga = "hp"
             elif val >= 0 and val <= plr.poäng and fråga == "hp":
@@ -117,7 +120,8 @@ def dörr():
     for i in range(1, 4):
         prin(f"{i}. {rand.choice(dörrar)}")
     while True:
-        val = input("    Vilken dörr vill du välja?\n    --> ").lower().replace(" ", "").replace(".", "")
+        prin("Vilken dörr vill du välja?")
+        val = input("    --> ").lower().replace(" ", "").replace(".", "")
         if val in {"1", "2", "3"}: print("\n    ||----------||\n"); break
         prin(Colors.red + "Du måste skriva antingen 1, 2 eller 3.")
     rand.choice([skapa_monster, skapa_fälla, skapa_kista])()
@@ -128,20 +132,20 @@ def dörr():
 monster_lista = ["Basilisk", "Cyklop", "Zombie", "Troll", "Spöke", "Golem", "Vampyr", "Varulv", "Gorgon", "Skelett", "Mimic", "Slime", "Spindel (Stor)", "Lindorm", "Häxa"]
 
 def skapa_monster():
-    total_strength = plr.strength
+    weapon_strength = 0
     for item in plr.inventory:
-        total_strength += item.strength_bonus/2
+        weapon_strength += item.strength_bonus
     monster = Player()
     monster.level = rand.randint(1, plr.level+5)
-    monster.strength = rand.randint(plr.level+3, round(total_strength)+5)
+    monster.strength = rand.randint(plr.level+3, round(plr.strength + weapon_strength/2)+5)
     prin(f"""Du har träffat ett monster!!
     Namn: {rand.choice(monster_lista)}
     Level: {monster.level}
     Styrka: {monster.strength}
     ...ni börjar slåss...""")
-    if monster.strength == total_strength:
+    if monster.strength == plr.strength + weapon_strength:
         prin(Colors.yellow + "Ni slogs hårt och länge men var lika starka så ingen vann. \n    Efter ett långt slagsmål drar du dig iväg utan stor skada.")
-    elif monster.strength > total_strength:
+    elif monster.strength > plr.strength + weapon_strength:
         prin(f"{Colors.red}Efter en kort fight krossades du av monstret. Ditt hp är nu {plr.hp-1}.")
         plr.hp -= 1
     else:
@@ -180,14 +184,16 @@ def skapa_kista():
         prin(Colors.yellow + "Ditt inventory är fullt! Vill du byta ut något för det du hittade?")
         prin("Här är itemet du hittade:")
         print_item(item)
-        prin("Här är ditt inventory, skriv 1, 2, 3, 4 eller 5 för det item du vill byta ut.\n    Om du inte vill byta ut något, skriv 6.")
+        prin("\n    Här är ditt inventory, skriv 1, 2, 3, 4 eller 5 för det item du vill byta ut.\n    Om du inte vill byta ut något, skriv 6.")
         for i in range(5):
-            prin(f"{i+1}. ")
+            prin(f"{i+1}.")
             print_item(plr.inventory[i])
+            print()
         while True:
-            val = input("--> ").replace(" ", "").replace(".", "")
+            val = input("    --> ").replace(" ", "").replace(".", "")
             match(val):
                 case("1" | "2" | "3" | "4" | "5"):
+                    prin(Colors.yellow + "Dina items byttes ut.")
                     plr.inventory[int(val)-1] = item; break
                 case("6"):
                     prin("Ingenting hände."); break
@@ -199,26 +205,26 @@ def skapa_kista():
 print("Välkommen till vårat äventyrsspel, gjort av Simon Remle, Emelie Gyllenberg och Daniel Furo.")
 
 while True:
-    fråga = input("Vill du ha en spel tutorial? (ja/nej) --> ").lower().replace(".", "").replace(" ", "")
+    fråga = input("    Vill du ha en spel tutorial? (ja/nej) --> ").lower().replace(".", "").replace(" ", "")
     if not fråga in {"ja", "nej"}:
-        print(Colors.red + "> Du måste skriva antingen ja eller nej." + Colors.reset)
+        prin(Colors.red + "> Du måste skriva antingen ja eller nej.")
     elif fråga == "ja":
-        print("""Spelet går ut på att du som modig äventyrare ska ta dig igenom olika rum i en håla, besegra moster och hitta skatter. 
-När du når nivå 10 vinner du spelet.
-Du väljer att gå in i en dörr genom att trycka 1, däreter får du välja mellan tre olika dörrar genom att trycka 1,2 eller 3.
-De olika dörrarna kan leda till olika rum, ett rum som har ett moster som du ska besegra, ett annat har en fälla och det tredje har en skatt.
-När du slåss emot monster kan två olika grejer att hända; 
-1: du besegrar mostret och går upp en level 
-2: du förlorar mot mostret och förlorar 1 liv. 
-Den som vinner avgörs av den som har mest styrke poäng.
-Om du har otur går du in i ett rum med en fälla, fällan kommer att skada dig och du förlorar 1 liv.
-Om du hittar en skatt kan den bestå av olika föremål, vapen som ger dig yttligare styrka eller om du har tur, mer liv.
+        prin("""Spelet går ut på att du som modig äventyrare ska ta dig igenom olika rum i en håla, besegra moster och hitta skatter. 
+    När du når nivå 10 vinner du spelet.
+    Du väljer att gå in i en dörr genom att trycka 1, däreter får du välja mellan tre olika dörrar genom att trycka 1,2 eller 3.
+    De olika dörrarna kan leda till olika rum, ett rum som har ett moster som du ska besegra, ett annat har en fälla och det tredje har en skatt.
+    När du slåss emot monster kan två olika grejer att hända; 
+    1: du besegrar mostret och går upp en level 
+    2: du förlorar mot mostret och förlorar 1 liv. 
+    Den som vinner avgörs av den som har mest styrke poäng.
+    Om du har otur går du in i ett rum med en fälla, fällan kommer att skada dig och du förlorar 1 liv.
+    Om du hittar en skatt kan den bestå av olika föremål, vapen som ger dig yttligare styrka eller om du har tur, mer liv.
 
-Du kan max ha 5 vapen i ditt inventory, varje vapen har en styrkebonus som läggs samman i dina stats, du kan kolla dina stats genom att tycka 2, och du kollar ditt inventory genom att trycka 3. 
-Om du har för många vapen i ditt inventory så måste du välja ett att slänga, detta kommer att påvrka din styrkebonus, så välj noga!
+    Du kan max ha 5 vapen i ditt inventory, varje vapen har en styrkebonus som läggs samman i dina stats, du kan kolla dina stats genom att tycka 2, och du kollar ditt inventory genom att trycka 3. 
+    Om du har för många vapen i ditt inventory så måste du välja ett att slänga, detta kommer att påvrka din styrkebonus, så välj noga!
 
-Lycka till på ditt äventyr!! :D
- """); break
+    Lycka till på ditt äventyr!! :D
+    """); break
     else: break
 
 
