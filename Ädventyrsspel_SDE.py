@@ -1,21 +1,32 @@
 import random as rand
 import time
 
-class Colors:                   #Detta är för att färga texten
+
+#--------------------------------------------------------------------------#
+#Klassen Colors() ger bara några lätta färger för att göra spelet lite snyggare.
+#Färgen som heter reset byter tillbaka textens färg till den normala.
+
+class Colors:
     red = "\u001b[31m"
     yellow = "\u001b[33m"
     green = "\u001b[32m"
     reset = "\u001b[0m"
 
 
-class Player:               #Detta är player-klassen som har de viktigaste statsen till spelaren
+#--------------------------------------------------------------------------#
+#Klassen Player() är den klassen som spelaren tillhör, som ger spelaren grundstatsen. (str, hp, inv-size)
+#Dessutom finns en __str__ funktion inbyggd i klassen;
+#Den skriver ut alla stats spelaren har, med itembonusar medräknade.
+#Därefter skapas en instans av klassen Player() som heter plr, detta är spelaren man kör med.
+
+class Player:
     strength = 0
     hp = 1
     inventory = []
     level = 1
     poäng = 9
 
-    def __str__(self):
+    def __str__(self):       
         item_strength, item_hp, item_inv = 0, 0, 0
 
         for item in plr.inventory:
@@ -29,6 +40,12 @@ class Player:               #Detta är player-klassen som har de viktigaste stat
     Hp: {self.hp} +({item_hp})
     Inventory storlek: 3 +({item_inv})""")
 
+plr = Player()
+
+
+#--------------------------------------------------------------------------#
+#Detta är klassen som alla föremål man kan få i spelet finns i.
+#Ett item kan ge/ta styrka, hp och inventorystorlek från spelaren.
 
 class Item:
     item_lista = []
@@ -39,6 +56,11 @@ class Item:
         self.hp_bonus = hp_bonus
         self.inv_bonus = inv_bonus
         self.item_lista.append(self)
+
+
+#--------------------------------------------------------------------------#
+#Detta är bara en lista med items som skapas med __init__ metoden.
+#De läggs automatiskt in i en item_lista i klassen Item() för att lätt kallas i kista-funktionen.
 
 a = Item("Widegrens svamp", 0, -2, 0)
 b = Item("Fackla", 3, 0, 0)
@@ -70,10 +92,13 @@ z = Item("Surt regn", 1, -1, 0)
 ä = Item("Kappsäck", -1, 0, 2)
 ö = Item("Fönsteröppnare", 3, 0, 0)
 
-plr = Player()
 
+#--------------------------------------------------------------------------#
+#Detta är vår egna print-funktion.
+#Den skriver ut en sträng långsamt (ser coolt ut) och den skriver den första raden fyra steg åt höger.
+#Därefter byts färgen automatiskt tillbaka till den normala ifall man skrivit ut texten med annan färg.
 
-def prin(text):
+def custom_print(text):
     print("    ", end="")
     for i in text:
         print(i, end="", flush=True)
@@ -81,12 +106,20 @@ def prin(text):
     print(Colors.reset)
 
 
+#--------------------------------------------------------------------------#
+#Denna funktion skriver ut statsen för ett specifikt item.
+#Den används till exempel i monster-funktionen och i funktionen som skriver ut inventoryt.
+
 def print_item(item):
-    prin(f"""Namn: {item.namn}
+    custom_print(f"""Namn: {item.namn}
     Styrkeboost: {item.strength_bonus}
     Hpboost: {item.hp_bonus}
     Inv-boost: {item.inv_bonus}""")
 
+
+#--------------------------------------------------------------------------#
+#Denna funktion räknar ut hur många items man får plats med i inventoryt.
+#Det är alltså tre (grundstorleken) plus alla bonusar från items.
 
 def plr_inv():
     inv_size = 3
@@ -95,6 +128,10 @@ def plr_inv():
     return inv_size
 
 
+#--------------------------------------------------------------------------#
+#Här är en funktion som räknar ut spelarens totala hp.
+#Alltså karaktärens hp plus alla hp-bonusar man kan få av items.
+
 def plr_hp():
     hp = plr.hp
     for item in plr.inventory:
@@ -102,9 +139,13 @@ def plr_hp():
     return hp
     
 
+#--------------------------------------------------------------------------#
+#Detta är den funktionen där man väljer vad man ska göra (typ huvudfunktionen).
+#Man kan antingen välja dörr (spela spelet), kolla ens player-stats, eller skriva ut allt i inventoryt.
+
 def main():
     while True:
-        prin("""
+        custom_print("""
     Vad vill du göra?
     1: Välj dörr
     2: Kolla stats
@@ -116,35 +157,45 @@ def main():
             case("1"): dörr(); break
             case("2"): print(plr); break
             case("3"): inv(); break
-            case(_): prin(Colors.red + "> Du måste skriva 1, 2 elller 3.")
+            case(_): custom_print(Colors.red + "> Du måste skriva 1, 2 elller 3.")
 
+
+#--------------------------------------------------------------------------#
+#Denna funktion skriver ut alla items i inventoryt med hjälp av print_item() funktionen och en loop.
 
 def inv():
     if len(plr.inventory) == 0:
-        prin("Ditt inventory är tomt!")
+        custom_print("Ditt inventory är tomt!")
     else:
-        prin("Här är vad som finns i ditt inventory:")
+        custom_print("Här är vad som finns i ditt inventory:")
         for i in range(len(plr.inventory)):
             print_item(plr.inventory[i])
             print()
 
 
+#--------------------------------------------------------------------------#
+#Här är koden för när spelaren vinner/förlorar spelet & funktionen för att spela spelet igen.
+
 def endwin():
     if plr_hp() <= 0:
-        prin(Colors.red + ">Du har nått noll Hp och förlorat spelet!<")
+        custom_print(Colors.red + ">Du har nått noll Hp och förlorat spelet!<")
     else:
-        prin(Colors.green + "<Du har nått nivå tio och vunnit spelet! Waow!>")
+        custom_print(Colors.green + "<Du har nått nivå tio och vunnit spelet! Waow!>")
     
     while True:
         fråga = input("    Vill du spela igen? (Ja/Nej) --> ").lower().replace(" ", "").replace(".", "")
         match fråga:
             case("ja"): restart(); break
             case("nej"): return "stop"
-            case(_): prin(Colors.red + "> Du måste svara med ja eller nej.")
+            case(_): custom_print(Colors.red + "> Du måste svara med ja eller nej.")
 
+
+#--------------------------------------------------------------------------#
+#Denna funktion startar helt enkelt om spelet.
+#Detta görs genom att tömma inventoryt och sätta statsen till samma som i början.        
 
 def restart():
-    prin(Colors.yellow + "...startar om spelet...\n")
+    custom_print(Colors.yellow + "...startar om spelet...\n")
     plr.strength = 0
     plr.hp = 1
     plr.inventory = []
@@ -152,14 +203,18 @@ def restart():
     plr.poäng = 9
 
 
+#--------------------------------------------------------------------------#
+#Denna funktion kallas varje runda av spelet där man har några poäng kvar att spendera på stats.
+#Statsen kan sättas i antingen styrka eller hp, och funktionen försvinner när man når noll hp.
+
 def poäng():
     print(plr)
-    prin(f"{Colors.green}\n    Du har {plr.poäng} poäng över att spendera på dina stats!")
+    custom_print(f"{Colors.green}\n    Du har {plr.poäng} poäng över att spendera på dina stats!")
     
     fråga = "styrka"
     while plr.poäng > 0:
         try:
-            prin(f"Hur många av dina poäng vill du sätta i {fråga}?")
+            custom_print(f"Hur många av dina poäng vill du sätta i {fråga}?")
             val = int(input("    --> ").replace(".", "").replace(" ", ""))
             
             if val >= 0 and val <= plr.poäng and fråga == "styrka":
@@ -167,33 +222,38 @@ def poäng():
             elif val >= 0 and val <= plr.poäng and fråga == "hp":
                 plr.hp += val; plr.poäng -= val; fråga = "styrka"
             else:
-                prin(f"{Colors.red}> Du måste skriva ett tal mellan 0 och {plr.poäng}.")
+                custom_print(f"{Colors.red}> Du måste skriva ett tal mellan 0 och {plr.poäng}.")
         
         except ValueError:
-            prin(Colors.red + "> Du måste skriva ett positivt heltal.")
+            custom_print(Colors.red + "> Du måste skriva ett positivt heltal.")
         
 
 #--------------------------------------------------------------------------#
-#Här är funktionen för dörrarna
+#Här kommer en funktion och lista som bara frågar vilken dörr man vill välja att gå in i.
+#Vilken dörr man väljer spelar ingen roll, eftersom det som kommer efter är random.
 
 dörrar = ["Stor stendörr", "Dörr med runor", "Metallgrind", "Gammal grind", "Drömmarnas dörr", "Träport", "Glasportal", "Stålport", "Hemlighetsfull lucka", "Betongport", "Rostig grind", "Träskdörr", "Valv dörr", "Glastunnel", "Rostig ståldörr", "Mörk gränd", "Gammal port", "Rosa dörr", "Tunneldörr", "Kuslig port"]
 
 def dörr():
     for i in range(1, 4):
-        prin(f"{i}. {rand.choice(dörrar)}")
+        custom_print(f"{i}. {rand.choice(dörrar)}")
     
     while True:
-        prin("Vilken dörr vill du välja?")
+        custom_print("Vilken dörr vill du välja?")
         val = input("    --> ").lower().replace(" ", "").replace(".", "")
         if val in {"1", "2", "3"}: 
             print("\n    ||----------||\n"); break
         
-        prin(Colors.red + "Du måste skriva antingen 1, 2 eller 3.")
+        custom_print(Colors.red + "Du måste skriva antingen 1, 2 eller 3.")
     
     rand.choice([skapa_monster, skapa_fälla, skapa_kista])()
 
+
 #--------------------------------------------------------------------------#
-#här är funktionen som definerar vad ett moster är och hur en fight kommer att utspela sig baserat på spelaren respektive monstrets styrka
+#Detta är en funktion som spelar ut en fight mot ett monster.
+#Monstret är definerat som en Player(), så den har likadana stats som spelaren.
+#Den med högst styrka vinner, och monstrets styrka är baserat på spelarens nivå och items i inventoryt.
+#Om man vinner levlar man upp, om man förlorar tappar man ett hp, om det är lika händer ingenting.
 
 monster_lista = ["Basilisk", "Cyklop", "Zombie", "Troll", "Spöke", "Golem", "Vampyr", "Varulv", "Gorgon", "Skelett", "Mimic", "Slime", "Spindel (Stor)", "Lindorm", "Häxa"]
 
@@ -205,65 +265,67 @@ def skapa_monster():
     monster = Player()
     monster.level = rand.randint(1, plr.level+5)
     monster.strength = rand.randint(plr.level+4, round(plr.strength + weapon_strength/2)+plr.level+5)
-    prin(f"""Du har träffat ett monster!!
+    custom_print(f"""Du har träffat ett monster!!
     Namn: {rand.choice(monster_lista)}
     Level: {monster.level}
     Styrka: {monster.strength}
     ...ni börjar slåss...""")
     
     if monster.strength == plr.strength + weapon_strength:
-        prin(Colors.yellow + "Ni slogs hårt och länge men var lika starka så ingen vann. \n    Efter ett långt slagsmål drar du dig iväg utan stor skada.")
+        custom_print(Colors.yellow + "Ni slogs hårt och länge men var lika starka så ingen vann. \n    Efter ett långt slagsmål drar du dig iväg utan stor skada.")
     elif monster.strength > plr.strength + weapon_strength:
-        prin(f"{Colors.red}Efter en kort fight krossades du av monstret. Ditt hp är nu {plr.hp-1}.")
+        custom_print(f"{Colors.red}Efter en kort fight krossades du av monstret. Ditt hp är nu {plr.hp-1}.")
         plr.hp -= 1
     else:
-        prin(f"{Colors.green}Du kämpade hårt och lyckades äntligen ta kol på det förbaskade monstret!\n    Din level gick upp till {plr.level+1}!")
+        custom_print(f"{Colors.green}Du kämpade hårt och lyckades äntligen ta kol på det förbaskade monstret!\n    Din level gick upp till {plr.level+1}!")
         plr.level += 1
         plr.poäng += 1
 
 
 #--------------------------------------------------------------------------#
-#Här är en funktion för  och de olika senariosarna som han hända, dvs förlora 1 liv, förlora 1 item eller komma undan,
+#Här är en funktion för och de olika senariosarna som han hända.
+#En fälla kan antingen skada spelaren, ta ett item från ens inventory, eller så kommer man undan.
 
 def skapa_fälla():
     match rand.randint(1, 3):
-        case(1): prin(f"{Colors.red}Du blev fångad i en fälla!\n    Ditt hp gick ner till {plr.hp-1}"); plr.hp -= 1
-        case(2): prin(Colors.green + "Du blev nästan fångad i en fälla, men kom snabbt undan!")
+        case(1): custom_print(f"{Colors.red}Du blev fångad i en fälla!\n    Ditt hp gick ner till {plr.hp-1}"); plr.hp -= 1
+        case(2): custom_print(Colors.green + "Du blev nästan fångad i en fälla, men kom snabbt undan!")
         case(3): 
             if len(plr.inventory) == 0:
-                prin(Colors.yellow + "En fälla försökte ta ditt senaste item, men du är fattig!")
+                custom_print(Colors.yellow + "En fälla försökte ta ditt senaste item, men du är fattig!")
             else:
-                prin(Colors.red + "En fälla tog ditt senaste item!")
+                custom_print(Colors.red + "En fälla tog ditt senaste item!")
                 print_item(plr.inventory[len(plr.inventory)-1])
-                prin(Colors.red + "har försvunnit!")
+                custom_print(Colors.red + "har försvunnit!")
                 del plr.inventory[len(plr.inventory)-1]
                 
                 while len(plr.inventory) > plr_inv():
-                    prin(Colors.red + "> Du har för många items i ditt inventory!")
-                    prin(f"{Colors.red}> {len(plr.inventory) - plr_inv()} items tas bort.")
+                    custom_print(Colors.red + "> Du har för många items i ditt inventory!")
+                    custom_print(f"{Colors.red}> {len(plr.inventory) - plr_inv()} items tas bort.")
                     
                     for i in range(len(plr.inventory) - plr_inv()):
                         del plr.inventory[len(plr.inventory-i-1)]
 
 
 #--------------------------------------------------------------------------#             
-#här är vapen/inventory/kist funktionen, där man kan plocka upp vapen och om man hittar många får man välja att byta ut ett vapen mot ett annat.
+#Här är vapen/inventory/kist funktionen, där man kan plocka upp vapen.
+#Om man hittar många får man välja att byta ut ett vapen mot ett annat.
 
 def skapa_kista():
     item = rand.choice(Item.item_lista)
     
     if len(plr.inventory) < plr_inv():
-        prin(Colors.green + "Du har hittat ett item!\n    Eftersom ditt inventory inte är fullt läggs det i ditt inventory!")
+        custom_print(Colors.green + "Du har hittat ett item!\n    Eftersom ditt inventory inte är fullt läggs det i ditt inventory!")
         print_item(item)
         plr.inventory.append(item)
     else:
-        prin(Colors.yellow + "Ditt inventory är fullt! Vill du byta ut något för det du hittade?")
-        prin("Här är itemet du hittade:")
+        custom_print(Colors.yellow + "Ditt inventory är fullt! Vill du byta ut något för det du hittade?")
+        custom_print("Här är itemet du hittade:")
         print_item(item)
-        prin("\n    Här är ditt inventory, skriv numret för det item du vill byta ut.\n    Om du inte vill byta ut något, skriv 0.")
+        custom_print("\n    Här är ditt inventory, skriv numret för det item du vill byta ut.\n    Om du inte vill byta ut något, skriv 0.")
         
         for i in range(plr_inv()):
-            prin(f"{i+1}.")
+            custom_print(f"{i+1}.")
             print_item(plr.inventory[i])
             print()
         
@@ -271,14 +333,14 @@ def skapa_kista():
             try:
                 val = int(input("    --> "))
                 if val == 0:
-                    prin(Colors.yellow + "Ingenting hände."); break
+                    custom_print(Colors.yellow + "Ingenting hände."); break
                 elif val in range(plr_inv()+1):
-                    prin(Colors.yellow + "Dina items byttes ut.")
+                    custom_print(Colors.yellow + "Dina items byttes ut.")
                     plr.inventory[val-1] = item; break
                 else:
-                    prin(f"{Colors.red}> Du måste skriva ett tal mellan 0 och {plr_inv()}.")
+                    custom_print(f"{Colors.red}> Du måste skriva ett tal mellan 0 och {plr_inv()}.")
             except ValueError:
-                prin(Colors.red + "> Du måste skriva ett positivt heltal.")
+                custom_print(Colors.red + "> Du måste skriva ett positivt heltal.")
 
 
 #--------------------------------------------------------------------------#
@@ -289,27 +351,30 @@ print("Välkommen till vårat äventyrsspel, gjort av Simon Remle, Emelie Gyllen
 while True:
     fråga = input("    Vill du ha en spel tutorial? (ja/nej) --> ").lower().replace(".", "").replace(" ", "")
     if not fråga in {"ja", "nej"}:
-        prin(Colors.red + "> Du måste skriva antingen ja eller nej.")
+        custom_print(Colors.red + "> Du måste skriva antingen ja eller nej.")
     elif fråga == "ja":
-        prin("""Spelet går ut på att du som modig äventyrare ska ta dig igenom olika rum i en håla, besegra moster och hitta skatter. 
-    När nivå 10 uppnås vinner du spelet.
-    Du väljer att gå in i en dörr genom att trycka 1, däreter får du välja mellan tre olika dörrar genom att trycka 1,2 eller 3.
-    De olika dörrarna kan leda till olika rum, ett rum som har ett moster som du ska försöka besegra, ett annat har en fälla och det tredje har en skatt.
-    När du slåss emot monster kan två olika grejer att hända; 
-    1: du besegrar mostret och går upp en level 
-    2: du förlorar mot mostret och förlorar 1 liv. 
-    Den som vinner avgörs av den som har mest styrke poäng.
-    Om du har otur går du in i ett rum med en fälla, fällan kan skada dig och ta 1 liv, den kan även ta en sak från ditt inventory eller kan du smita utan att ta skada.
-    Om du hittar en skatt kan den bestå av olika föremål, saker som ger dig yttligare styrka, mer liv eller ger mer plats i inventoryt.
+        custom_print("""Spelet går ut på att du som modig äventyrare ska ta dig igenom olika rum i en håla, besegra moster och hitta skatter. 
+När nivå 10 uppnås vinner du spelet.
+Du väljer att gå in i en dörr genom att trycka 1, däreter får du välja mellan tre olika dörrar genom att trycka 1,2 eller 3.
+De olika dörrarna kan leda till olika rum, ett rum som har ett moster som du ska försöka besegra, ett annat har en fälla och det tredje har en skatt.
+När du slåss emot monster kan två olika grejer att hända; 
+1: du besegrar mostret och går upp en level 
+2: du förlorar mot mostret och förlorar 1 liv. 
+Den som vinner avgörs av den som har mest styrke poäng.
+Om du har otur går du in i ett rum med en fälla, fällan kan skada dig och ta 1 liv, den kan även ta en sak från ditt inventory eller kan du smita utan att ta skada.
+Om du hittar en skatt kan den bestå av olika föremål, saker som ger dig yttligare styrka, mer liv eller ger mer plats i inventoryt.
 
-    Du kan max ha 3 saker i ditt inventory, varje sak har en styrkebonus, hpbonus eller inventorybonus som läggs samman i dina stats. 
-    Du kan kolla dina stats genom att tycka 2, och du kollar ditt inventory genom att trycka 3. 
-    Om du har för många saker i ditt inventory så måste du välja ett att slänga, detta kommer att påvrka dina sammanlagda stats, så välj noga!
+Du kan max ha 3 saker i ditt inventory, varje sak har en styrkebonus, hpbonus eller inventorybonus som läggs samman i dina stats. 
+Du kan kolla dina stats genom att tycka 2, och du kollar ditt inventory genom att trycka 3. 
+Om du har för många saker i ditt inventory så måste du välja ett att slänga, detta kommer att påvrka dina sammanlagda stats, så välj noga!
 
-    Lycka till på ditt äventyr!! :D
-    """); break
+Lycka till på ditt äventyr!! :D
+"""); break
     else: break
 
+
+#--------------------------------------------------------------------------#
+#Här kommer huvudkoden till programmet
 
 while True:
     if plr.level >= 10 or plr_hp() <= 0:
@@ -318,15 +383,4 @@ while True:
     if plr.poäng > 0:
         poäng()
     main()
-
-
-    
-
-
-
-
-
-
-
-
 
