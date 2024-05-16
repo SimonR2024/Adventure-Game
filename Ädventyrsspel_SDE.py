@@ -274,7 +274,7 @@ def skapa_monster():
     if monster.strength == plr.strength + weapon_strength:
         custom_print(Colors.yellow + "Ni slogs hårt och länge men var lika starka så ingen vann. \n    Efter ett långt slagsmål drar du dig iväg utan stor skada.")
     elif monster.strength > plr.strength + weapon_strength:
-        custom_print(f"{Colors.red}Efter en kort fight krossades du av monstret. Ditt hp är nu {plr.hp-1}.")
+        custom_print(f"{Colors.red}Efter en kort fight krossades du av monstret. Ditt hp är nu {plr_hp()-1}.")
         plr.hp -= 1
     else:
         custom_print(f"{Colors.green}Du kämpade hårt och lyckades äntligen ta kol på det förbaskade monstret!\n    Din level gick upp till {plr.level+1}!")
